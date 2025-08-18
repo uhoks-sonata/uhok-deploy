@@ -9,14 +9,10 @@ services:
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8000/healthz"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    depends_on:
-      - uhok-ml-inference
-    environment:
-      - ML_MODE=remote_embed  # ML 모드 설정
-      - ML_INFERENCE_URL=http://uhok-ml-inference:8080
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
   # = 프론트엔드 (Nginx가 React 빌드 결과를 서빙 + /api 프록시)
   uhok-web:
@@ -29,23 +25,3 @@ services:
     depends_on:
       - uhok-backend
     restart: always
-
-  # = ML 추론 서비스 (새로 분리된 서비스)
-  uhok-ml-inference:
-    build: ../uhok-ml-inference
-    container_name: uhok-ml-inference
-    env_file:
-      - .env
-    expose:
-      - "8080"
-    restart: always
-    healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8080/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    volumes:
-      - ml_data:/app/store  # 벡터 인덱스 데이터 영속화
-
-volumes:
-  ml_data:  # ML 데이터 영속화를 위한 볼륨

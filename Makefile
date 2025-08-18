@@ -7,11 +7,11 @@ CURL    ?= curl -s
 
 up:
 	# """
-	# 백엔드/웹/ML 추론 서비스 이미지를 병렬로 빌드하고, 모든 서비스를 기동한 뒤 기본 헬스를 점검합니다.
+	# 백엔드/웹 서비스 이미지를 병렬로 빌드하고, 모든 서비스를 기동한 뒤 기본 헬스를 점검합니다.
 	# 비동기 처리: build를 &로 병렬 실행 후 wait.
 	# """
-	($(COMPOSE) build uhok-backend & $(COMPOSE) build uhok-web & $(COMPOSE) build uhok-ml-inference & wait)
-	$(COMPOSE) up -d uhok-backend uhok-web uhok-ml-inference
+	($(COMPOSE) build uhok-backend & $(COMPOSE) build uhok-web & wait)
+	$(COMPOSE) up -d uhok-backend uhok-web
 	$(MAKE) health
 
 up-backend:
@@ -30,14 +30,6 @@ up-web:
 	$(COMPOSE) ps
 	-$(CURL) -I http://localhost/ | head -n 1 || true
 	-$(CURL) -I http://localhost/api/docs | head -n 1 || true
-
-up-ml:
-	# """
-	# ML 추론 서비스만 새로 빌드 후 기동합니다.
-	# """
-	$(COMPOSE) up -d --build uhok-ml-inference
-	$(COMPOSE) ps
-	-$(CURL) http://localhost:8080/api/health || true
 
 start:
 	# """
@@ -77,25 +69,17 @@ restart-web:
 	# 웹(Nginx)만 재빌드/재기동 후 루트/문서 응답을 확인합니다.
 	# """
 	$(COMPOSE) up -d --build uhok-web
-	-$(CURL) -I http://n 1 || true
+	-$(CURL) -I http://localhost/ | head -n 1 || true
 	-$(CURL) -I http://localhost/api/docs | head -n 1 || true
-
-restart-ml:
-	# """
-	# ML 추론 서비스만 재빌드/재기동 후 헬스체크를 확인합니다.
-	# """
-	$(COMPOSE) up -d --build uhok-ml-inference
-	-$(CURL) http://localhost:8080/api/health || true
 
 logs:
 	# """
-	# 백엔드/웹/ML 추론 서비스 로그를 동시에 실시간 팔로우합니다. 종료: Ctrl+C
-	# 비동기 처리: 세 로그를 &로 병렬 실행 후 wait.
+	# 백엔드/웹 서비스 로그를 동시에 실시간 팔로우합니다. 종료: Ctrl+C
+	# 비동기 처리: 두 로그를 &로 병렬 실행 후 wait.
 	# """
 	trap "exit 0" INT; \
 	($(COMPOSE) logs -f --tail=200 uhok-backend & \
 	 $(COMPOSE) logs -f --tail=200 uhok-web & \
-	 $(COMPOSE) logs -f --tail=200 uhok-ml-inference & \
 	 wait)
 
 health:
