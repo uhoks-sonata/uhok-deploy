@@ -3,15 +3,15 @@ SHELL := /bin/bash
 COMPOSE ?= docker compose
 CURL    ?= curl -s
 
-.PHONY: up up-backend up-web start stop down down-v restart-backend restart-web logs health status nginx-reload prune-light prune-hard migrate
+.PHONY: up up-backend up-frontend up-nginx start stop down down-v restart-backend restart-frontend restart-nginx logs health status nginx-reload prune-light prune-hard migrate
 
 up:
 	# """
-	# 백엔드/웹 서비스 이미지를 병렬로 빌드하고, 모든 서비스를 기동한 뒤 기본 헬스를 점검합니다.
+	# 백엔드/프론트엔드/nginx 서비스 이미지를 병렬로 빌드하고, 모든 서비스를 기동한 뒤 기본 헬스를 점검합니다.
 	# 비동기 처리: build를 &로 병렬 실행 후 wait.
 	# """
-	($(COMPOSE) build uhok-backend & $(COMPOSE) build uhok-web & wait)
-	$(COMPOSE) up -d uhok-backend uhok-web
+	($(COMPOSE) build uhok-backend & $(COMPOSE) build uhok-frontend & wait)
+	$(COMPOSE) up -d
 	$(MAKE) health
 
 up-backend:
@@ -22,11 +22,19 @@ up-backend:
 	$(COMPOSE) ps
 	-$(CURL) http://localhost:3001/api/health || true
 
-up-web:
+up-frontend:
 	# """
-	# 웹(Nginx)만 새로 빌드 후 기동합니다.
+	# 프론트엔드만 새로 빌드 후 기동합니다.
 	# """
-	$(COMPOSE) up -d --build uhok-web
+	$(COMPOSE) up -d --build uhok-frontend
+	$(COMPOSE) ps
+	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
+
+up-nginx:
+	# """
+	# nginx만 새로 빌드 후 기동합니다.
+	# """
+	$(COMPOSE) up -d --build uhok-nginx
 	$(COMPOSE) ps
 	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
 	-$(CURL) -I http://localhost:3001/api/docs | head -n 1 || true
@@ -64,22 +72,30 @@ restart-backend:
 	$(COMPOSE) up -d --build uhok-backend
 	-$(CURL) http://localhost:3001/api/health || true
 
-restart-web:
+restart-frontend:
 	# """
-	# 웹(Nginx)만 재빌드/재기동 후 루트/문서 응답을 확인합니다.
+	# 프론트엔드만 재빌드/재기동 후 루트 응답을 확인합니다.
 	# """
-	$(COMPOSE) up -d --build uhok-web
+	$(COMPOSE) up -d --build uhok-frontend
+	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
+
+restart-nginx:
+	# """
+	# nginx만 재빌드/재기동 후 루트/문서 응답을 확인합니다.
+	# """
+	$(COMPOSE) up -d --build uhok-nginx
 	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
 	-$(CURL) -I http://localhost:3001/api/docs | head -n 1 || true
 
 logs:
 	# """
-	# 백엔드/웹 서비스 로그를 동시에 실시간 팔로우합니다. 종료: Ctrl+C
-	# 비동기 처리: 두 로그를 &로 병렬 실행 후 wait.
+	# 백엔드/프론트엔드/nginx 서비스 로그를 동시에 실시간 팔로우합니다. 종료: Ctrl+C
+	# 비동기 처리: 세 로그를 &로 병렬 실행 후 wait.
 	# """
 	trap "exit 0" INT; \
 	($(COMPOSE) logs -f --tail=200 uhok-backend & \
-	 $(COMPOSE) logs -f --tail=200 uhok-web & \
+	 $(COMPOSE) logs -f --tail=200 uhok-frontend & \
+	 $(COMPOSE) logs -f --tail=200 uhok-nginx & \
 	 wait)
 
 health:
@@ -100,7 +116,7 @@ nginx-reload:
 	# """
 	# nginx.conf 변경을 무중단 반영합니다. 실패 시 컨테이너 재시작으로 대체합니다.
 	# """
-	-$(COMPOSE) exec -T uhok-web nginx -s reload || $(COMPOSE) restart uhok-web
+	-$(COMPOSE) exec -T uhok-nginx nginx -s reload || $(COMPOSE) restart uhok-nginx
 
 prune-light:
 	# """
