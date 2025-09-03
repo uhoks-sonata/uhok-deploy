@@ -20,7 +20,7 @@ up-backend:
 	# """
 	$(COMPOSE) up -d --build uhok-backend
 	$(COMPOSE) ps
-	-$(CURL) http://localhost/api/healthz || true
+	-$(CURL) http://localhost:3001/api/health || true
 
 up-web:
 	# """
@@ -28,8 +28,8 @@ up-web:
 	# """
 	$(COMPOSE) up -d --build uhok-web
 	$(COMPOSE) ps
-	-$(CURL) -I http://localhost/ | head -n 1 || true
-	-$(CURL) -I http://localhost/api/docs | head -n 1 || true
+	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
+	-$(CURL) -I http://localhost:3001/api/docs | head -n 1 || true
 
 start:
 	# """
@@ -62,15 +62,15 @@ restart-backend:
 	# 백엔드만 재빌드/재기동 후 헬스 확인합니다.
 	# """
 	$(COMPOSE) up -d --build uhok-backend
-	-$(CURL) http://localhost/api/healthz || true
+	-$(CURL) http://localhost:3001/api/health || true
 
 restart-web:
 	# """
 	# 웹(Nginx)만 재빌드/재기동 후 루트/문서 응답을 확인합니다.
 	# """
 	$(COMPOSE) up -d --build uhok-web
-	-$(CURL) -I http://localhost/ | head -n 1 || true
-	-$(CURL) -I http://localhost/api/docs | head -n 1 || true
+	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
+	-$(CURL) -I http://localhost:3001/api/docs | head -n 1 || true
 
 logs:
 	# """
@@ -86,9 +86,9 @@ health:
 	# """
 	# 프록시 경유로 헬스/문서/루트 응답을 점검합니다.
 	# """
-	-$(CURL) http://localhost/api/healthz || true
-	-$(CURL) -I http://localhost/api/docs | head -n 1 || true
-	-$(CURL) -I http://localhost/ | head -n 1 || true
+	-$(CURL) http://localhost:3001/api/health || true
+	-$(CURL) -I http://localhost:3001/api/docs | head -n 1 || true
+	-$(CURL) -I http://localhost:3001/ | head -n 1 || true
 
 status:
 	# """
