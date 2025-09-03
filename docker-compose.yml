@@ -3,7 +3,7 @@ services:
     build: ../uhok-backend
     container_name: uhok-backend
     env_file:
-      - .env
+      - ../uhok-backend/.env
     expose:
       - "9000"
     restart: always
