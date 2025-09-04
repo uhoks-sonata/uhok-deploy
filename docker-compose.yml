@@ -41,6 +41,30 @@ services:
       - app_net
     restart: unless-stopped
 
+  ml-inference:
+    build:
+      context: ../uhok-ml-inference
+      dockerfile: Dockerfile
+    image: uhok-ml-inference:0.1.0
+    container_name: uhok-ml-inference
+    environment:
+      - HF_HOME=/models/hf_cache
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ml_cache:/models/hf_cache
+    expose:
+      - "8001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    networks:
+      - app_net
+    restart: unless-stopped
+    profiles: ["with-ml"]  # 선택적 실행을 위한 프로필
+
   redis:
     image: redis:7-alpine
     container_name: uhok-redis
@@ -70,6 +94,7 @@ services:
 
 volumes:
   redis_data:
+  ml_cache:  # ML 모델 캐시용 볼륨
 
 networks:
   app_net:
