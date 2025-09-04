@@ -28,7 +28,7 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:0.1.1
+    image: uhok-frontend:0.1.3
     container_name: uhok-frontend
     expose:
       - "80"
