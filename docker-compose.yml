@@ -3,7 +3,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:0.1.1
+    image: uhok-backend:0.1.3
     container_name: uhok-backend
     env_file:
       - ../uhok-backend/.env

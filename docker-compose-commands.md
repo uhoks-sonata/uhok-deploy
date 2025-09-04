@@ -1,8 +1,23 @@
 # Docker Compose 명령어 정리 (V2)
 
-## 기본 명령어
+## 기본 명령어 (순서대로)
 
-### 1. 서비스 시작 및 중지
+### 1. 이미지 빌드 (가장 먼저!)
+```bash
+# 모든 서비스 이미지 빌드
+docker compose build
+
+# 특정 서비스 이미지 빌드
+docker compose build backend
+
+# 캐시 없이 강제 빌드
+docker compose build --no-cache
+
+# 빌드 후 즉시 시작
+docker compose up --build
+```
+
+### 2. 서비스 시작 및 중지
 ```bash
 # 모든 서비스 시작 (백그라운드)
 docker compose up -d
@@ -20,7 +35,7 @@ docker compose down
 docker compose down -v
 ```
 
-### 2. 서비스 상태 확인
+### 3. 서비스 상태 확인
 ```bash
 # 실행 중인 서비스 목록
 docker compose ps
@@ -35,7 +50,7 @@ docker compose logs backend
 docker compose logs -f backend
 ```
 
-### 3. 서비스 재시작
+### 4. 서비스 재시작
 ```bash
 # 모든 서비스 재시작
 docker compose restart
@@ -46,23 +61,6 @@ docker compose restart backend
 # 서비스 중지 후 다시 시작
 docker compose stop backend
 docker compose start backend
-```
-
-## 빌드 관련 명령어
-
-### 4. 이미지 빌드
-```bash
-# 모든 서비스 이미지 빌드
-docker compose build
-
-# 특정 서비스 이미지 빌드
-docker compose build backend
-
-# 캐시 없이 강제 빌드
-docker compose build --no-cache
-
-# 빌드 후 즉시 시작
-docker compose up --build
 ```
 
 ## 컨테이너 관리
@@ -87,9 +85,12 @@ docker compose config backend
 
 ## 프로젝트별 명령어 (uhok 프로젝트)
 
-### 7. 개발 환경 실행
+### 7. 개발 환경 실행 (순서대로)
 ```bash
-# 전체 스택 시작 (백엔드 + 프론트엔드 + nginx)
+# 1단계: 이미지 빌드
+docker compose build
+
+# 2단계: 전체 스택 시작 (백엔드 + 프론트엔드 + nginx)
 docker compose up -d
 
 # 접속 URL: http://localhost:5000
@@ -97,13 +98,15 @@ docker compose up -d
 
 ### 8. 개별 서비스 관리
 ```bash
-# 백엔드만 시작
+# 특정 서비스 빌드 후 시작
+docker compose build backend
 docker compose up -d backend
 
-# 프론트엔드만 시작
+# 프론트엔드 빌드 후 시작
+docker compose build frontend
 docker compose up -d frontend
 
-# nginx만 시작
+# nginx 시작 (이미지 빌드 불필요)
 docker compose up -d nginx
 ```
 
@@ -233,16 +236,16 @@ docker version
 
 ---
 
-## 빠른 참조
+## 빠른 참조 (순서대로)
 
 | 명령어 | 설명 |
 |--------|------|
+| `docker compose build` | 이미지 빌드 (가장 먼저!) |
 | `docker compose up -d` | 백그라운드에서 모든 서비스 시작 |
-| `docker compose down` | 모든 서비스 중지 |
 | `docker compose ps` | 실행 중인 서비스 상태 확인 |
 | `docker compose logs -f` | 실시간 로그 확인 |
 | `docker compose restart` | 모든 서비스 재시작 |
-| `docker compose build` | 이미지 빌드 |
+| `docker compose down` | 모든 서비스 중지 |
 | `docker compose exec <service> bash` | 컨테이너 내부 접속 |
 
 ## 프로젝트 구조
