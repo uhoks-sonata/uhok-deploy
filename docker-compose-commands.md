@@ -219,7 +219,7 @@ ls -la ../uhok-frontend
 ```bash
 # 오류: port is already allocated
 # 해결: 사용 중인 포트 확인 및 변경
-netstat -tulpn | grep :9005
+netstat -tulpn | grep :5000
 # docker-compose.yml에서 포트 번호 변경
 ```
 
