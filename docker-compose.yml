@@ -7,8 +7,10 @@ services:
     container_name: uhok-backend
     expose:
       - "9000"
+      - "6379"
     ports:
       - "9000:9000"
+      - "6379:6379"
     env_file:
       - ../uhok-backend/.env
     environment:
