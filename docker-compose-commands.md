@@ -197,6 +197,40 @@ docker stats --no-stream
 docker-compose exec uhok-nginx ping uhok-backend
 ```
 
+### 15. 자주 발생하는 오류와 해결방법
+
+#### 이미지 참조 오류
+```bash
+# 오류: unable to get image 'nginx:1.25-alpine:0.1.0': invalid reference format
+# 해결: docker-compose.yml에서 이미지 태그 형식 확인
+# 올바른 형식: nginx:1.25-alpine
+# 잘못된 형식: nginx:1.25-alpine:0.1.0
+```
+
+#### 빌드 컨텍스트 오류
+```bash
+# 오류: build path does not exist
+# 해결: 상대 경로 확인 및 디렉토리 존재 여부 확인
+ls -la ../uhok-backend
+ls -la ../uhok-frontend
+```
+
+#### 포트 충돌
+```bash
+# 오류: port is already allocated
+# 해결: 사용 중인 포트 확인 및 변경
+netstat -tulpn | grep :3001
+# docker-compose.yml에서 포트 번호 변경
+```
+
+#### 권한 오류
+```bash
+# 오류: permission denied
+# 해결: Docker 데몬 실행 상태 확인
+docker version
+# Windows: Docker Desktop 실행 확인
+```
+
 ---
 
 ## 빠른 참조

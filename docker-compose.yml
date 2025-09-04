@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   uhok-nginx:
-    image: nginx:1.25-alpine:0.1.0
+    image: nginx:1.25-alpine
     container_name: uhok-nginx
     depends_on:
       - uhok-backend
