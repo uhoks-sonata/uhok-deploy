@@ -3,7 +3,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:latest
+    image: uhok-backend:0.1.0
     container_name: uhok-backend
     expose:
       - "9000"
@@ -20,7 +20,7 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:latest
+    image: uhok-frontend:0.1.0
     container_name: uhok-frontend
     expose:
       - "80"
@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   uhok-nginx:
-    image: nginx:1.25-alpine
+    image: nginx:1.25-alpine:0.1.0
     container_name: uhok-nginx
     depends_on:
       - uhok-backend
