@@ -1,0 +1,218 @@
+# Docker Compose 명령어 정리
+
+## 기본 명령어
+
+### 1. 서비스 시작 및 중지
+```bash
+# 모든 서비스 시작 (백그라운드)
+docker-compose up -d
+
+# 모든 서비스 시작 (포그라운드 - 로그 확인 가능)
+docker-compose up
+
+# 특정 서비스만 시작
+docker-compose up -d uhok-backend
+
+# 모든 서비스 중지
+docker-compose down
+
+# 모든 서비스 중지 (볼륨도 함께 삭제)
+docker-compose down -v
+```
+
+### 2. 서비스 상태 확인
+```bash
+# 실행 중인 서비스 목록
+docker-compose ps
+
+# 서비스 로그 확인
+docker-compose logs
+
+# 특정 서비스 로그 확인
+docker-compose logs uhok-backend
+
+# 실시간 로그 확인
+docker-compose logs -f uhok-backend
+```
+
+### 3. 서비스 재시작
+```bash
+# 모든 서비스 재시작
+docker-compose restart
+
+# 특정 서비스 재시작
+docker-compose restart uhok-backend
+
+# 서비스 중지 후 다시 시작
+docker-compose stop uhok-backend
+docker-compose start uhok-backend
+```
+
+## 빌드 관련 명령어
+
+### 4. 이미지 빌드
+```bash
+# 모든 서비스 이미지 빌드
+docker-compose build
+
+# 특정 서비스 이미지 빌드
+docker-compose build uhok-backend
+
+# 캐시 없이 강제 빌드
+docker-compose build --no-cache
+
+# 빌드 후 즉시 시작
+docker-compose up --build
+```
+
+## 컨테이너 관리
+
+### 5. 컨테이너 접속
+```bash
+# 컨테이너 내부 접속
+docker-compose exec uhok-backend bash
+
+# 컨테이너 내부에서 명령어 실행
+docker-compose exec uhok-backend python manage.py migrate
+```
+
+### 6. 컨테이너 정보 확인
+```bash
+# 컨테이너 상세 정보
+docker-compose config
+
+# 특정 서비스 설정 확인
+docker-compose config uhok-backend
+```
+
+## 프로젝트별 명령어 (uhok 프로젝트)
+
+### 7. 개발 환경 실행
+```bash
+# 전체 스택 시작 (백엔드 + 프론트엔드 + nginx)
+docker-compose up -d
+
+# 접속 URL: http://localhost:3001
+```
+
+### 8. 개별 서비스 관리
+```bash
+# 백엔드만 시작
+docker-compose up -d uhok-backend
+
+# 프론트엔드만 시작
+docker-compose up -d uhok-frontend
+
+# nginx만 시작
+docker-compose up -d uhok-nginx
+```
+
+### 9. 로그 모니터링
+```bash
+# 백엔드 로그 확인
+docker-compose logs -f uhok-backend
+
+# 프론트엔드 로그 확인
+docker-compose logs -f uhok-frontend
+
+# nginx 로그 확인
+docker-compose logs -f uhok-nginx
+
+# 모든 서비스 로그 확인
+docker-compose logs -f
+```
+
+### 10. 문제 해결
+```bash
+# 컨테이너 상태 확인
+docker-compose ps
+
+# 컨테이너 리소스 사용량 확인
+docker stats
+
+# 특정 컨테이너 상세 정보
+docker inspect uhok-backend
+
+# 네트워크 확인
+docker network ls
+docker network inspect uhok-deploy_app_net
+```
+
+## 유용한 옵션들
+
+### 11. 추가 옵션
+```bash
+# 강제로 컨테이너 재생성
+docker-compose up -d --force-recreate
+
+# 특정 서비스만 강제 재생성
+docker-compose up -d --force-recreate uhok-backend
+
+# 볼륨과 함께 완전 정리
+docker-compose down -v --remove-orphans
+
+# 사용하지 않는 이미지 정리
+docker image prune
+
+# 모든 사용하지 않는 리소스 정리
+docker system prune
+```
+
+## 환경 변수 관리
+
+### 12. 환경 설정
+```bash
+# 환경 변수 파일 지정
+docker-compose --env-file .env up -d
+
+# 특정 환경 변수 오버라이드
+docker-compose up -d -e DEBUG=1
+```
+
+## 백업 및 복원
+
+### 13. 데이터 백업
+```bash
+# 볼륨 백업
+docker run --rm -v uhok-deploy_data:/data -v $(pwd):/backup alpine tar czf /backup/backup.tar.gz -C /data .
+
+# 볼륨 복원
+docker run --rm -v uhok-deploy_data:/data -v $(pwd):/backup alpine tar xzf /backup/backup.tar.gz -C /data
+```
+
+## 트러블슈팅
+
+### 14. 일반적인 문제 해결
+```bash
+# 포트 충돌 확인
+netstat -tulpn | grep :3001
+
+# 컨테이너 로그에서 에러 확인
+docker-compose logs | grep -i error
+
+# 컨테이너 리소스 사용량 확인
+docker stats --no-stream
+
+# 네트워크 연결 테스트
+docker-compose exec uhok-nginx ping uhok-backend
+```
+
+---
+
+## 빠른 참조
+
+| 명령어 | 설명 |
+|--------|------|
+| `docker-compose up -d` | 백그라운드에서 모든 서비스 시작 |
+| `docker-compose down` | 모든 서비스 중지 |
+| `docker-compose ps` | 실행 중인 서비스 상태 확인 |
+| `docker-compose logs -f` | 실시간 로그 확인 |
+| `docker-compose restart` | 모든 서비스 재시작 |
+| `docker-compose build` | 이미지 빌드 |
+| `docker-compose exec <service> bash` | 컨테이너 내부 접속 |
+
+## 프로젝트 구조
+- **uhok-backend**: Python 백엔드 서비스 (포트 9000)
+- **uhok-frontend**: 프론트엔드 서비스 (포트 80)
+- **uhok-nginx**: Nginx 리버스 프록시 (포트 3001)
+- **app_net**: 서비스 간 통신을 위한 브리지 네트워크
