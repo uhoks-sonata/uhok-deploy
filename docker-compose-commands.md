@@ -93,7 +93,7 @@ docker compose build
 # 2단계: 전체 스택 시작 (백엔드 + 프론트엔드 + nginx)
 docker compose up -d
 
-# 접속 URL: http://localhost:5000
+# 접속 URL: http://localhost:80 (또는 http://localhost)
 ```
 
 ### 8. 개별 서비스 관리
@@ -188,7 +188,7 @@ docker run --rm -v uhok-deploy_data:/data -v $(pwd):/backup alpine tar xzf /back
 ### 14. 일반적인 문제 해결
 ```bash
 # 포트 충돌 확인
-netstat -tulpn | grep :5000
+netstat -tulpn | grep :80
 
 # 컨테이너 로그에서 에러 확인
 docker compose logs | grep -i error
@@ -222,7 +222,7 @@ ls -la ../uhok-frontend
 ```bash
 # 오류: port is already allocated
 # 해결: 사용 중인 포트 확인 및 변경
-netstat -tulpn | grep :5000
+netstat -tulpn | grep :80
 # docker-compose.yml에서 포트 번호 변경
 ```
 
@@ -251,6 +251,6 @@ docker version
 ## 프로젝트 구조
 - **backend**: Python 백엔드 서비스 (포트 9000)
 - **frontend**: 프론트엔드 서비스 (포트 80)
-- **nginx**: Nginx 리버스 프록시 (포트 5000)
+- **nginx**: Nginx 리버스 프록시 (포트 80)
 - **redis**: Redis 서비스 (포트 6379)
 - **app_net**: 서비스 간 통신을 위한 브리지 네트워크
