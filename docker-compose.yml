@@ -3,7 +3,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:0.1.4
+    image: uhok-backend:0.2.0
     container_name: uhok-backend
     env_file:
       - ../uhok-backend/.env
@@ -28,7 +28,7 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:0.1.4
+    image: uhok-frontend:1.0.0
     container_name: uhok-frontend
     expose:
       - "80"
