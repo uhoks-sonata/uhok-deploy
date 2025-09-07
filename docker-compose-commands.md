@@ -112,7 +112,8 @@ docker compose up -d nginx
 # redis 시작 (이미지 빌드 불필요)
 docker compose up -d redis
 
-# ml-inference 시작 (이미지 빌드 불필요)
+# ml-inference 빌드 후 시작 (커스텀 이미지 빌드 필요)
+docker compose build ml-inference
 docker compose --profile with-ml up -d ml-inference
 ```
 
