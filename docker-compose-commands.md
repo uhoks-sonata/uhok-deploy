@@ -108,6 +108,12 @@ docker compose up -d frontend
 
 # nginx 시작 (이미지 빌드 불필요)
 docker compose up -d nginx
+
+# redis 시작 (이미지 빌드 불필요)
+docker compose up -d redis
+
+# ml-inference 시작 (이미지 빌드 불필요)
+docker compose --profile with-ml up -d ml-inference
 ```
 
 ### 9. 로그 모니터링
@@ -120,6 +126,12 @@ docker compose logs -f frontend
 
 # nginx 로그 확인
 docker compose logs -f nginx
+
+# redis 로그 확인
+docker compose logs -f redis
+
+# ml-inference 로그 확인
+docker compose logs -f ml-inference
 
 # 모든 서비스 로그 확인
 docker compose logs -f
@@ -198,6 +210,12 @@ docker stats --no-stream
 
 # 네트워크 연결 테스트
 docker compose exec nginx ping backend
+
+# Redis 연결 테스트
+docker compose exec redis redis-cli ping
+
+# ML Inference 서비스 연결 테스트
+docker compose exec ml-inference curl -f http://localhost:8001/health
 ```
 
 ### 15. 자주 발생하는 오류와 해결방법
@@ -253,4 +271,134 @@ docker version
 - **frontend**: 프론트엔드 서비스 (포트 80)
 - **nginx**: Nginx 리버스 프록시 (포트 80)
 - **redis**: Redis 서비스 (포트 6379)
+- **ml-inference**: ML 추론 서비스 (포트 8001, with-ml 프로필)
 - **app_net**: 서비스 간 통신을 위한 브리지 네트워크
+
+## Redis 및 Nginx 전용 명령어
+
+### 16. Redis 관리
+```bash
+# Redis 서비스 시작
+docker compose up -d redis
+
+# Redis 서비스 중지
+docker compose stop redis
+
+# Redis 서비스 재시작
+docker compose restart redis
+
+# Redis CLI 접속
+docker compose exec redis redis-cli
+
+# Redis 상태 확인
+docker compose exec redis redis-cli ping
+
+# Redis 데이터 확인
+docker compose exec redis redis-cli keys "*"
+
+# Redis 메모리 사용량 확인
+docker compose exec redis redis-cli info memory
+```
+
+### 17. Nginx 관리
+```bash
+# Nginx 서비스 시작
+docker compose up -d nginx
+
+# Nginx 서비스 중지
+docker compose stop nginx
+
+# Nginx 서비스 재시작
+docker compose restart nginx
+
+# Nginx 설정 테스트
+docker compose exec nginx nginx -t
+
+# Nginx 설정 리로드
+docker compose exec nginx nginx -s reload
+
+# Nginx 상태 확인
+docker compose exec nginx nginx -s status
+
+# Nginx 접근 로그 확인
+docker compose logs -f nginx
+```
+
+### 18. Redis와 Nginx 함께 관리
+```bash
+# Redis와 Nginx 동시 시작
+docker compose up -d redis nginx
+
+# Redis와 Nginx 동시 중지
+docker compose stop redis nginx
+
+# Redis와 Nginx 동시 재시작
+docker compose restart redis nginx
+
+# Redis와 Nginx 상태 확인
+docker compose ps redis nginx
+```
+
+### 19. ML Inference 관리
+```bash
+# ML Inference 서비스 시작 (with-ml 프로필 필요)
+docker compose --profile with-ml up -d ml-inference
+
+# ML Inference 서비스 중지
+docker compose stop ml-inference
+
+# ML Inference 서비스 재시작
+docker compose restart ml-inference
+
+# ML Inference 빌드 후 시작
+docker compose build ml-inference
+docker compose --profile with-ml up -d ml-inference
+
+# ML Inference 상태 확인
+docker compose exec ml-inference curl -f http://localhost:8001/health
+
+# ML Inference 로그 확인
+docker compose logs -f ml-inference
+
+# ML Inference 컨테이너 접속
+docker compose exec ml-inference bash
+
+# ML 모델 캐시 볼륨 확인
+docker volume ls | grep ml_cache
+
+# ML 모델 캐시 볼륨 삭제 (주의: 모델 재다운로드 필요)
+docker volume rm uhok-deploy_ml_cache
+```
+
+### 20. 프로필 기반 실행
+```bash
+# 기본 서비스만 시작 (backend, frontend, nginx)
+docker compose up -d
+
+# Redis 포함하여 시작
+docker compose --profile with-redis up -d
+
+# ML Inference 포함하여 시작
+docker compose --profile with-ml up -d
+
+# Redis와 ML Inference 모두 포함하여 시작
+docker compose --profile with-redis --profile with-ml up -d
+
+# 모든 서비스 시작 (모든 프로필 포함)
+docker compose --profile with-redis --profile with-ml up -d
+```
+
+### 21. ML Inference와 다른 서비스 함께 관리
+```bash
+# ML Inference와 Redis 동시 시작
+docker compose --profile with-ml --profile with-redis up -d ml-inference redis
+
+# ML Inference와 Nginx 동시 시작
+docker compose --profile with-ml up -d ml-inference nginx
+
+# ML Inference, Redis, Nginx 동시 시작
+docker compose --profile with-ml --profile with-redis up -d ml-inference redis nginx
+
+# ML Inference 상태 확인
+docker compose ps ml-inference
+```
