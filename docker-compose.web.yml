@@ -20,7 +20,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:0.2.1
+    image: uhok-backend:0.2.2
     env_file:
       - ../uhok-backend/.env
     environment:
@@ -34,7 +34,7 @@ services:
       - "9000"
     healthcheck:
       # /healthz 없으면 /openapi.json 혹은 /docs 등으로 변경
-      test: ["CMD-SHELL", "wget -qO- http://localhost:9000/api/health || exit 1"]
+      test: ["CMD-SHELL", "python - <<'PY'\nimport urllib.request,sys\nu='http://localhost:9000/api/health'\ntry:\n  with urllib.request.urlopen(u, timeout=3) as r:\n    sys.exit(0 if r.status==200 else 1)\nexcept Exception:\n  sys.exit(1)\nPY"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -48,7 +48,7 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:1.0.1
+    image: uhok-frontend:1.0.2
     environment:
       - CI=false  # ESLint 경고를 오류로 처리하지 않도록 설정
     expose:
