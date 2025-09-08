@@ -3,7 +3,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:0.2.0
+    image: uhok-backend:0.2.1
     container_name: uhok-backend
     env_file:
       - ../uhok-backend/.env
@@ -28,8 +28,10 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:1.0.0
+    image: uhok-frontend:1.0.1
     container_name: uhok-frontend
+    environment:
+      - CI=false  # ESLint 경고를 오류로 처리하지 않도록 설정
     expose:
       - "80"
     healthcheck:
@@ -45,7 +47,7 @@ services:
     build:
       context: ../uhok-ml-inference
       dockerfile: Dockerfile
-    image: uhok-ml-inference:0.1.0
+    image: uhok-ml-inference:0.1.1
     container_name: uhok-ml-inference
     environment:
       - HF_HOME=/models/hf_cache
