@@ -47,7 +47,7 @@ services:
     build:
       context: ../uhok-ml-inference
       dockerfile: Dockerfile
-    image: uhok-ml-inference:0.1.1
+    image: uhok-ml-inference:0.1.2
     container_name: uhok-ml-inference
     environment:
       - HF_HOME=/models/hf_cache
