@@ -32,4 +32,6 @@ volumes:
 
 networks:
   app_net:
-    driver: bridge
+    external: true
+    name: uhok-deploy_app_net
+    
