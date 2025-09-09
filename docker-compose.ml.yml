@@ -1,9 +1,9 @@
 services:
-  ml_inference:
+  ml-inference:
     build:
       context: ../uhok-ml-inference
       dockerfile: Dockerfile
-    image: uhok-ml-inference:0.1.2
+    image: uhok-ml-inference:0.1.3
     environment:
       - HF_HOME=/models/hf_cache
       - PYTHONUNBUFFERED=1
