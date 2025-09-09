@@ -10,8 +10,10 @@ services:
     volumes:
       - ml_cache:/models/hf_cache
       # - /data/models:/models:ro   # 모델 가중치는 이미지에 넣지 말고 볼륨/마운트 권장
+    ports:
+      - "8001:8001"   # localhost:8001로 접근 가능
     expose:
-      - "8001"   # 내부 통신만. SG에서 웹 EC2만 허용
+      - "8001"   # 내부 통신도 유지
     healthcheck:
       # 실제 엔드포인트에 맞춰 /health 또는 /healthz 로 변경
       test: ["CMD-SHELL", "curl -fsS http://localhost:8001/health || exit 1"]
