@@ -2,9 +2,14 @@
 
 UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환경입니다. 백엔드, 프론트엔드, ML 추론 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
 
+## 🎯 프로젝트 개요
+
+UHOK는 레시피 추천 플랫폼으로, 사용자가 보유한 재료를 기반으로 최적의 레시피를 추천하는 서비스입니다. 마이크로서비스 아키텍처를 통해 확장성과 유지보수성을 확보했습니다.
+
 ## 📁 파일 구조
 
-- `docker-compose.yml` - 전체 서비스 오케스트레이션 설정
+- `docker-compose.web.yml` - 웹 서비스 (백엔드, 프론트엔드, Nginx, Redis)
+- `docker-compose.ml.yml` - ML 추론 서비스
 - `Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
 - `docker-compose-commands.md` - 상세한 Docker Compose 명령어 가이드
 - `nginx.conf` - Nginx 리버스 프록시 설정
@@ -35,42 +40,60 @@ UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환�
 ## 🚀 서비스 구성
 
 ### 핵심 서비스
-- **backend** (uhok-backend:0.2.0) - Python FastAPI 백엔드 서비스
-- **frontend** (uhok-frontend:1.0.0) - React 프론트엔드 애플리케이션
+- **backend** (uhok-backend:1.0.0) - Python FastAPI 백엔드 서비스
+- **frontend** (uhok-frontend:2.0.0) - React 프론트엔드 애플리케이션
 - **nginx** (nginx:1.25-alpine) - 리버스 프록시 및 로드 밸런서
 
 ### 선택적 서비스
-- **ml-inference** (uhok-ml-inference:0.1.0) - ML 추론 서비스 (프로필: `with-ml`)
+- **ml-inference** (uhok-ml-inference:1.0.0) - ML 추론 서비스 (프로필: `with-ml`)
 - **redis** (redis:7-alpine) - 캐시 및 세션 저장소 (프로필: `with-redis`)
 
 ## 🔧 빠른 시작
 
 ### 1. 기본 실행 (백엔드 + 프론트엔드 + Nginx)
 ```bash
-# Makefile 사용 (권장)
-make up
+# 웹 서비스 실행
+docker compose -f docker-compose.web.yml up -d
 
-# 또는 Docker Compose 직접 사용
-docker compose build
-docker compose up -d
+# 또는 Makefile 사용 (권장)
+make up
 ```
 
 ### 2. ML 서비스 포함 실행
 ```bash
 # ML 서비스와 함께 실행
-docker compose --profile with-ml up -d
+docker compose -f docker-compose.web.yml -f docker-compose.ml.yml up -d
 
 # Redis와 함께 실행
-docker compose --profile with-redis up -d
+docker compose -f docker-compose.web.yml --profile with-redis up -d
 
 # 모든 서비스 실행
-docker compose --profile with-ml --profile with-redis up -d
+docker compose -f docker-compose.web.yml -f docker-compose.ml.yml --profile with-redis up -d
 ```
 
 ### 3. 접속 확인
 - **웹 애플리케이션**: http://localhost
 - **API 문서**: http://localhost/api/docs
 - **API 헬스체크**: http://localhost/api/health
+- **ML 서비스**: http://localhost:8001/health (ML 서비스 실행 시)
+
+## 🎯 주요 기능
+
+### 백엔드 서비스 (uhok-backend)
+- **레시피 추천 API**: 재료 기반 레시피 추천
+- **사용자 관리**: 인증 및 권한 관리
+- **데이터베이스 연동**: MariaDB, PostgreSQL 지원
+- **ML 서비스 통합**: 원격 ML 추론 서비스 연동
+
+### 프론트엔드 서비스 (uhok-frontend)
+- **반응형 웹 UI**: 모바일/데스크톱 지원
+- **레시피 검색**: 키워드 및 재료 기반 검색
+- **사용자 인터페이스**: 직관적인 사용자 경험
+
+### ML 추론 서비스 (uhok-ml-inference)
+- **텍스트 임베딩**: 한국어 레시피 텍스트 벡터화
+- **고성능 처리**: CPU 최적화된 모델 실행
+- **RESTful API**: 표준화된 API 인터페이스
 
 ## 📋 Makefile 명령어
 
