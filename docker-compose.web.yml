@@ -48,7 +48,7 @@ services:
     build:
       context: ../uhok-frontend
       dockerfile: Dockerfile
-    image: uhok-frontend:2.0.0
+    image: uhok-frontend:2.0.1
     environment:
       - CI=false  # ESLint 경고를 오류로 처리하지 않도록 설정
     expose:
