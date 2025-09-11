@@ -20,7 +20,7 @@ services:
     build:
       context: ../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:2.0.1
+    image: uhok-backend:2.0.2
     env_file:
       - ../uhok-backend/.env
     extra_hosts:
