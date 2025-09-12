@@ -6,12 +6,29 @@ UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환�
 
 UHOK는 레시피 추천 플랫폼으로, 사용자가 보유한 재료를 기반으로 최적의 레시피를 추천하는 서비스입니다. 마이크로서비스 아키텍처를 통해 확장성과 유지보수성을 확보했습니다.
 
-## 📁 파일 구조
+## 📁 폴더 구조
 
-- `docker-compose.web.yml` - 웹 서비스 (백엔드, 프론트엔드, Nginx, Redis)
-- `Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
-- `docker-compose-commands.md` - 상세한 Docker Compose 명령어 가이드
-- `nginx.conf` - Nginx 리버스 프록시 설정
+```
+uhok-deploy/
+├── app/                          # 앱 서비스 (백엔드, 프론트엔드, Redis)
+│   ├── .env.backend
+│   └── docker-compose.app.yml
+├── ml/                           # ML 추론 서비스
+│   └── docker-compose.ml.yml
+└── public/                       # 공개 서비스 (Nginx, 전체 통합)
+    ├── .env.public
+    ├── docker-compose.public.yml
+    ├── nginx.conf
+    ├── Makefile
+    └── docker-compose-commands.md
+```
+
+### 주요 파일
+- `public/docker-compose.public.yml` - 전체 웹 서비스 (백엔드, 프론트엔드, Nginx, Redis)
+- `app/docker-compose.app.yml` - 앱 서비스 (백엔드, 프론트엔드, Redis)
+- `ml/docker-compose.ml.yml` - ML 추론 서비스
+- `public/Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
+- `public/nginx.conf` - Nginx 리버스 프록시 설정
 
 ## 🏗️ 아키텍처
 
@@ -38,35 +55,54 @@ UHOK는 레시피 추천 플랫폼으로, 사용자가 보유한 재료를 기�
 
 ## 🚀 서비스 구성
 
-### 핵심 서비스
+### 공개 서비스 (public/)
+- **nginx** (nginx:1.25-alpine) - 리버스 프록시 및 로드 밸런서
 - **backend** (uhok-backend:2.0.1) - Python FastAPI 백엔드 서비스
 - **frontend** (uhok-frontend:3.0.0) - React 프론트엔드 애플리케이션
-- **nginx** (nginx:1.25-alpine) - 리버스 프록시 및 로드 밸런서
-
-### 선택적 서비스
 - **redis** (redis:7-alpine) - 캐시 및 세션 저장소 (프로필: `with-redis`)
+
+### 앱 서비스 (app/)
+- **backend** (uhok-backend:2.0.1) - Python FastAPI 백엔드 서비스
+- **frontend** (uhok-frontend:3.0.0) - React 프론트엔드 애플리케이션
+- **redis** (redis:7-alpine) - 캐시 및 세션 저장소
+
+### ML 서비스 (ml/)
+- **ml-inference** (uhok-ml-inference:latest) - Python ML 추론 서비스
 
 ## 🔧 빠른 시작
 
-### 1. 기본 실행 (백엔드 + 프론트엔드 + Nginx)
+### 1. 전체 서비스 실행 (공개 서비스)
 ```bash
-# 웹 서비스 실행
-docker compose -f docker-compose.web.yml up -d
+# public 폴더에서 실행
+cd public
+docker compose -f docker-compose.public.yml up -d
 
 # 또는 Makefile 사용 (권장)
 make up
 ```
 
-### 2. Redis 포함 실행
+### 2. 개별 서비스 실행
 ```bash
-# Redis와 함께 실행
-docker compose -f docker-compose.web.yml --profile with-redis up -d
+# 앱 서비스만 실행
+cd app
+docker compose -f docker-compose.app.yml up -d
+
+# ML 추론 서비스만 실행
+cd ml
+docker compose -f docker-compose.ml.yml up -d
 ```
 
-### 3. 접속 확인
+### 3. Redis 포함 실행
+```bash
+# Redis와 함께 실행
+docker compose -f docker-compose.public.yml --profile with-redis up -d
+```
+
+### 4. 접속 확인
 - **웹 애플리케이션**: http://localhost
 - **API 문서**: http://localhost/api/docs
 - **API 헬스체크**: http://localhost/api/health
+- **ML 서비스**: http://localhost:8001 (직접 접근)
 
 ## 🎯 주요 기능
 
@@ -85,7 +121,9 @@ docker compose -f docker-compose.web.yml --profile with-redis up -d
 
 ### 기본 명령어
 ```bash
-make up              # 웹 서비스 빌드 및 실행
+make up              # 웹 서비스 빌드 및 실행 (public/)
+make up-ml           # ML 추론 서비스 실행
+make up-app          # 앱 서비스 실행
 make start           # 정지된 서비스 재시작
 make stop            # 모든 서비스 일시 중지
 make down            # 컨테이너 및 네트워크 제거
@@ -104,13 +142,16 @@ make up-nginx        # Nginx만 빌드 및 실행
 make restart-backend # 백엔드 재빌드 및 재시작
 make restart-frontend # 프론트엔드 재빌드 및 재시작
 make restart-nginx   # Nginx 재빌드 및 재시작
+make restart-ml      # ML 추론 서비스 재시작
 ```
 
 ### 모니터링 및 관리
 ```bash
-make logs            # 모든 서비스 로그 실시간 확인
+make logs            # 웹 서비스 로그 실시간 확인
+make logs-ml         # ML 추론 서비스 로그 확인
 make health          # 서비스 헬스체크
-make status          # 컨테이너 상태 확인
+make status          # 웹 서비스 상태 확인
+make status-ml       # ML 추론 서비스 상태 확인
 make nginx-reload    # Nginx 설정 무중단 리로드
 ```
 
@@ -133,6 +174,12 @@ make migrate         # 데이터베이스 마이그레이션 실행
 - **포트**: 80 (내부)
 - **빌드**: React 애플리케이션
 - **정적 파일**: Nginx를 통해 서빙
+
+### ML Inference (uhok-ml-inference)
+- **포트**: 8001 (외부 노출)
+- **헬스체크**: `/health`
+- **환경변수**: `../uhok-ml-inference/.env` 파일 사용
+- **역할**: 머신러닝 모델 추론 서비스
 
 ### Redis
 - **포트**: 6379 (내부)
@@ -163,12 +210,18 @@ http://localhost/openapi.json → backend:9000/openapi.json
 http://localhost/ → frontend:80/
 ```
 
+### ML 서비스 (직접 접근)
+```
+http://localhost:8001/* → ml-inference:8001/*
+```
+
 ## 🔧 환경 설정
 
 ### 환경 변수 파일
 각 서비스는 해당 디렉토리의 `.env` 파일을 사용합니다:
 - `../uhok-backend/.env` - 백엔드 설정
 - `../uhok-frontend/.env` - 프론트엔드 설정 (필요시)
+- `../uhok-ml-inference/.env` - ML 추론 서비스 설정
 
 ### 네트워크
 - **app_net**: 모든 서비스가 통신하는 브리지 네트워크
@@ -178,13 +231,17 @@ http://localhost/ → frontend:80/
 
 ### 로그 확인
 ```bash
-# 모든 서비스 로그
+# 웹 서비스 로그
 make logs
 
+# ML 추론 서비스 로그
+make logs-ml
+
 # 특정 서비스 로그
-docker compose logs -f backend
-docker compose logs -f frontend
-docker compose logs -f nginx
+docker compose -f docker-compose.public.yml logs -f backend
+docker compose -f docker-compose.public.yml logs -f frontend
+docker compose -f docker-compose.public.yml logs -f nginx
+docker compose -f ../ml/docker-compose.ml.yml logs -f ml-inference
 ```
 
 ### 헬스체크
@@ -192,8 +249,11 @@ docker compose logs -f nginx
 # 전체 헬스체크
 make health
 
-# 개별 서비스 상태
+# 웹 서비스 상태
 make status
+
+# ML 추론 서비스 상태
+make status-ml
 ```
 
 ### 리소스 사용량
@@ -244,6 +304,9 @@ make restart-backend
 # 프론트엔드 변경 후
 make restart-frontend
 
+# ML 추론 서비스 변경 후
+make restart-ml
+
 # Nginx 설정 변경 후
 make nginx-reload
 ```
@@ -263,7 +326,8 @@ make migrate
 
 ## 🔗 관련 문서
 
-- [Docker Compose 명령어 가이드](docker-compose-commands.md)
-- [Nginx 설정](nginx.conf)
+- [Docker Compose 명령어 가이드](public/docker-compose-commands.md)
+- [Nginx 설정](public/nginx.conf)
 - [백엔드 서비스](../uhok-backend/README.md)
 - [프론트엔드 서비스](../uhok-frontend/README.md)
+- [ML 추론 서비스](../uhok-ml-inference/README.md)
