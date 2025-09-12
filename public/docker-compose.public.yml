@@ -4,7 +4,7 @@ services:
     ports:
       - "80:80"   # localhost:80 로 접근 (외부로 공개되는 유일한 포트)
     env_file:
-      - ./.env.public        # BACKEND_PRIVATE_IP, ML_PRIVATE_IP
+      - .env        # BACKEND_PRIVATE_IP, ML_PRIVATE_IP
     depends_on:
       frontend:
         condition: service_started

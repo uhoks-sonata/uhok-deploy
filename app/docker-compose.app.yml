@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: uhok-backend:2.0.2
     env_file:
-      - ./.env.backend
+      - .env
     # extra_hosts:
     #   # 🔒 ML EC2 프라이빗 IP를 내부 도메인으로 매핑
     #   - "ml.internal:${ML_PRIVATE_IP}" # TODO: 프라이빗 IP 사용
