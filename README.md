@@ -7,24 +7,25 @@ UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환�
 ```
 uhok-deploy/
 ├── app/                          # 앱 서비스 (백엔드, 프론트엔드, Redis)
-│   ├── .env.backend
+│   ├── .env
 │   └── docker-compose.app.yml
 ├── ml/                           # ML 추론 서비스
 │   └── docker-compose.ml.yml
 └── public/                       # 공개 서비스 (Nginx, 전체 통합)
-    ├── .env.public
-    ├── docker-compose.public.yml
-    ├── nginx.conf
-    ├── Makefile
-    └── docker-compose-commands.md
+│   ├── .env
+│   ├── docker-compose.public.yml
+│   └── nginx.conf
+├── Makefile
+└── docker-compose-commands.md
 ```
 
 ### 주요 파일
-- `public/docker-compose.public.yml` - 전체 웹 서비스 (백엔드, 프론트엔드, Nginx, Redis)
-- `app/docker-compose.app.yml` - 앱 서비스 (백엔드, 프론트엔드, Redis)
-- `ml/docker-compose.ml.yml` - ML 추론 서비스
-- `public/Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
+- `public/docker-compose.public.yml` - 웹 서비스 (Nginx, 프론트엔드)
 - `public/nginx.conf` - Nginx 리버스 프록시 설정
+- `app/docker-compose.app.yml` - 앱 서비스 (백엔드, Redis)
+- `ml/docker-compose.ml.yml` - ML 추론 서비스
+- `Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
+- `docker-compose-commands.md` - Docker Compose 명령어 상세 가이드
 
 ## 🏗️ 아키텍처
 
@@ -72,32 +73,28 @@ docker network create uhok_net
 
 ### 2. 전체 서비스 실행
 ```bash
-# public 폴더에서 실행 (nginx + frontend)
-cd public
-make up
+# uhok-deploy 루트에서 실행
+make up-all
 
-# app 폴더에서 실행 (backend + redis)
-cd ../app
-docker compose -f docker-compose.app.yml up -d
-
-# ml 폴더에서 실행 (ml-inference)
-cd ../ml
-docker compose -f docker-compose.ml.yml up -d
+# 또는 개별 실행
+make up          # 웹 서비스 (nginx + frontend)
+make up-app      # 앱 서비스 (backend + redis)
+make up-ml       # ML 서비스 (ml-inference)
 ```
 
 ### 3. 개별 서비스 실행
 ```bash
 # 백엔드만 실행 (Redis 포함)
-cd app
-docker compose -f docker-compose.app.yml --profile with-redis up -d
+make up-backend
 
 # ML 추론 서비스만 실행
-cd ml
-docker compose -f docker-compose.ml.yml up -d
+make up-ml
 
 # 프론트엔드만 실행
-cd public
 make up-frontend
+
+# Nginx만 실행
+make up-nginx
 ```
 
 ### 4. 접속 확인
@@ -129,51 +126,6 @@ make up-frontend
 - **임베딩 생성**: SentenceTransformers 기반 레시피 임베딩
 - **모델**: paraphrase-multilingual-MiniLM-L12-v2
 - **성능 최적화**: CPU 전용, 컨테이너화된 배포
-
-## 📋 Makefile 명령어
-
-### 기본 명령어
-```bash
-make up              # 웹 서비스 빌드 및 실행 (nginx + frontend)
-make up-ml           # ML 추론 서비스 실행
-make up-app          # 앱 서비스 실행 (backend + redis)
-make start           # 정지된 서비스 재시작
-make stop            # 모든 서비스 일시 중지
-make down            # 컨테이너 및 네트워크 제거
-make down-v          # 볼륨까지 완전 제거
-```
-
-### 개별 서비스 관리
-```bash
-make up-backend      # 백엔드만 빌드 및 실행
-make up-frontend     # 프론트엔드만 빌드 및 실행
-make up-nginx        # Nginx만 빌드 및 실행
-```
-
-### 재시작 명령어
-```bash
-make restart-backend # 백엔드 재빌드 및 재시작
-make restart-frontend # 프론트엔드 재빌드 및 재시작
-make restart-nginx   # Nginx 재빌드 및 재시작
-make restart-ml      # ML 추론 서비스 재시작
-```
-
-### 모니터링 및 관리
-```bash
-make logs            # 웹 서비스 로그 실시간 확인
-make logs-ml         # ML 추론 서비스 로그 확인
-make health          # 서비스 헬스체크
-make status          # 웹 서비스 상태 확인
-make status-ml       # ML 추론 서비스 상태 확인
-make nginx-reload    # Nginx 설정 무중단 리로드
-```
-
-### 정리 명령어
-```bash
-make prune-light     # 사용하지 않는 이미지/네트워크 정리
-make prune-hard      # 모든 미사용 리소스 강력 정리
-make migrate         # 데이터베이스 마이그레이션 실행
-```
 
 ## 🔍 서비스 상세 정보
 
@@ -261,31 +213,35 @@ http://localhost/nginx-health → nginx 헬스체크
 # 웹 서비스 로그 (nginx + frontend)
 make logs
 
+# 앱 서비스 로그 (backend + redis)
+make logs-app
+
 # ML 추론 서비스 로그
 make logs-ml
 
+# 모든 서비스 로그
+make logs-all
+
 # 특정 서비스 로그
-docker compose -f docker-compose.public.yml logs -f nginx
-docker compose -f docker-compose.public.yml logs -f frontend
-docker compose -f ../app/docker-compose.app.yml logs -f backend
-docker compose -f ../app/docker-compose.app.yml logs -f redis
-docker compose -f ../ml/docker-compose.ml.yml logs -f ml-inference
+docker compose -f public/docker-compose.public.yml logs -f nginx
+docker compose -f public/docker-compose.public.yml logs -f frontend
+docker compose -f app/docker-compose.app.yml logs -f backend
+docker compose -f app/docker-compose.app.yml logs -f redis
+docker compose -f ml/docker-compose.ml.yml logs -f ml-inference
 ```
 
 ### 헬스체크
 ```bash
-# 전체 헬스체크 (nginx + frontend)
+# 전체 헬스체크
 make health
 
-# 웹 서비스 상태 (nginx + frontend)
+# 모든 서비스 상태
 make status
 
-# ML 추론 서비스 상태
-make status-ml
-
-# 백엔드 상태 (app 폴더에서)
-cd app
-docker compose -f docker-compose.app.yml ps
+# 개별 서비스 상태
+make status-web      # 웹 서비스 (nginx + frontend)
+make status-app      # 앱 서비스 (backend + redis)
+make status-ml       # ML 추론 서비스
 ```
 
 ### 리소스 사용량
@@ -322,42 +278,37 @@ docker inspect uhok-ml-inference
 ### 로그 확인
 ```bash
 # 에러 로그 필터링
-docker compose -f docker-compose.public.yml logs | grep -i error
-docker compose -f ../app/docker-compose.app.yml logs | grep -i error
-docker compose -f ../ml/docker-compose.ml.yml logs | grep -i error
+docker compose -f public/docker-compose.public.yml logs | grep -i error
+docker compose -f app/docker-compose.app.yml logs | grep -i error
+docker compose -f ml/docker-compose.ml.yml logs | grep -i error
 
 # 특정 서비스 에러
-docker compose -f docker-compose.public.yml logs nginx | grep -i error
-docker compose -f docker-compose.public.yml logs frontend | grep -i error
-docker compose -f ../app/docker-compose.app.yml logs backend | grep -i error
-docker compose -f ../ml/docker-compose.ml.yml logs ml-inference | grep -i error
+docker compose -f public/docker-compose.public.yml logs nginx | grep -i error
+docker compose -f public/docker-compose.public.yml logs frontend | grep -i error
+docker compose -f app/docker-compose.app.yml logs backend | grep -i error
+docker compose -f ml/docker-compose.ml.yml logs ml-inference | grep -i error
 ```
 
 ## 🔄 개발 워크플로우
 
 ### 코드 변경 시
 ```bash
-# 백엔드 변경 후 (app 폴더에서)
-cd app
-docker compose -f docker-compose.app.yml up -d --build backend
+# 백엔드 변경 후
+make restart-backend
 
-# 프론트엔드 변경 후 (public 폴더에서)
-cd public
+# 프론트엔드 변경 후
 make restart-frontend
 
-# ML 추론 서비스 변경 후 (ml 폴더에서)
-cd ml
-docker compose -f docker-compose.ml.yml up -d --build
+# ML 추론 서비스 변경 후
+make restart-ml
 
-# Nginx 설정 변경 후 (public 폴더에서)
-cd public
+# Nginx 설정 변경 후
 make nginx-reload
 ```
 
 ### 데이터베이스 마이그레이션
 ```bash
-# 마이그레이션 실행 (public 폴더에서)
-cd public
+# 마이그레이션 실행
 make migrate
 ```
 
@@ -372,7 +323,7 @@ make migrate
 
 ## 🔗 관련 문서
 
-- [Docker Compose 명령어 가이드](public/docker-compose-commands.md)
+- [Docker Compose 명령어 가이드](docker-compose-commands.md)
 - [Nginx 설정](public/nginx.conf)
 - [백엔드 서비스](../uhok-backend/README.md)
 - [프론트엔드 서비스](../uhok-frontend/README.md)
