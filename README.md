@@ -1,6 +1,7 @@
 # UHOK 배포 환경 (Docker Compose)
 
-UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환경입니다. 백엔드, 프론트엔드, ML 추론 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
+UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환경입니다. 
+백엔드, 프론트엔드, ML 추론 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
 
 ## 📁 폴더 구조
 
@@ -32,7 +33,7 @@ uhok-deploy/
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │   Backend       │    │   ML Inference  │
-│   (React)       │    │   (FastAPI)     │    │   (Python)      │
+│   (React.js)    │    │   (FastAPI)     │    │   (FastAPI)     │
 │   Port: 80      │    │   Port: 9000    │    │   Port: 8001    │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                      │                       │
@@ -97,13 +98,6 @@ make up-frontend
 make up-nginx
 ```
 
-### 4. 접속 확인
-- **웹 애플리케이션**: http://localhost
-- **API 문서**: http://localhost/docs
-- **API 헬스체크**: http://localhost/api/health
-- **ML 서비스**: http://localhost:8001 (직접 접근)
-- **ML API**: http://localhost/ml/ (Nginx 프록시)
-
 ## 🎯 주요 기능
 
 ### 백엔드 서비스 (uhok-backend)
@@ -161,170 +155,3 @@ make up-nginx
 - **역할**: 리버스 프록시, 로드 밸런서
 - **설정**: `nginx.conf`
 - **이미지**: nginx:1.25-alpine
-
-## 🌐 라우팅 설정
-
-### API 요청
-```
-http://localhost/api/* → backend:9000/api/*
-http://localhost/api/payment/* → backend:9000/api/payment/*
-```
-
-### 문서 및 스키마
-```
-http://localhost/docs → backend:9000/docs
-http://localhost/redoc → backend:9000/redoc
-http://localhost/openapi.json → backend:9000/openapi.json
-```
-
-### ML 서비스
-```
-http://localhost/ml/* → ml-inference:8001/*
-http://localhost:8001/* → ml-inference:8001/* (직접 접근)
-```
-
-### 프론트엔드
-```
-http://localhost/ → frontend:80/
-```
-
-### 헬스체크
-```
-http://localhost/nginx-health → nginx 헬스체크
-```
-
-## 🔧 환경 설정
-
-### 환경 변수 파일
-각 서비스는 해당 디렉토리의 `.env` 파일을 사용합니다:
-- `../uhok-backend/.env` - 백엔드 설정
-- `../uhok-frontend/.env` - 프론트엔드 설정 (필요시)
-- `../uhok-ml-inference/.env` - ML 추론 서비스 설정
-
-### 네트워크
-- **uhok_net**: 모든 서비스가 통신하는 외부 브리지 네트워크
-- **외부 접근**: Nginx를 통해서만 가능 (포트 80)
-- **네트워크 생성**: `docker network create uhok_net` (최초 1회)
-
-## 📊 모니터링
-
-### 로그 확인
-```bash
-# 웹 서비스 로그 (nginx + frontend)
-make logs
-
-# 앱 서비스 로그 (backend + redis)
-make logs-app
-
-# ML 추론 서비스 로그
-make logs-ml
-
-# 모든 서비스 로그
-make logs-all
-
-# 특정 서비스 로그
-docker compose -f public/docker-compose.public.yml logs -f nginx
-docker compose -f public/docker-compose.public.yml logs -f frontend
-docker compose -f app/docker-compose.app.yml logs -f backend
-docker compose -f app/docker-compose.app.yml logs -f redis
-docker compose -f ml/docker-compose.ml.yml logs -f ml-inference
-```
-
-### 헬스체크
-```bash
-# 전체 헬스체크
-make health
-
-# 모든 서비스 상태
-make status
-
-# 개별 서비스 상태
-make status-web      # 웹 서비스 (nginx + frontend)
-make status-app      # 앱 서비스 (backend + redis)
-make status-ml       # ML 추론 서비스
-```
-
-### 리소스 사용량
-```bash
-# 컨테이너 리소스 사용량
-docker stats
-
-# 특정 컨테이너 상세 정보
-docker inspect uhok-backend
-docker inspect uhok-frontend
-docker inspect uhok-ml-inference
-```
-
-## 🚨 문제 해결
-
-### 일반적인 문제
-1. **포트 충돌**: 80번 포트가 사용 중인 경우
-   ```bash
-   netstat -tulpn | grep :80
-   ```
-
-2. **이미지 빌드 실패**: Dockerfile 경로 확인
-   ```bash
-   ls -la ../uhok-backend/Dockerfile
-   ls -la ../uhok-frontend/Dockerfile
-   ```
-
-3. **서비스 연결 실패**: 네트워크 확인
-   ```bash
-   docker network ls
-   docker network inspect uhok_net
-   ```
-
-### 로그 확인
-```bash
-# 에러 로그 필터링
-docker compose -f public/docker-compose.public.yml logs | grep -i error
-docker compose -f app/docker-compose.app.yml logs | grep -i error
-docker compose -f ml/docker-compose.ml.yml logs | grep -i error
-
-# 특정 서비스 에러
-docker compose -f public/docker-compose.public.yml logs nginx | grep -i error
-docker compose -f public/docker-compose.public.yml logs frontend | grep -i error
-docker compose -f app/docker-compose.app.yml logs backend | grep -i error
-docker compose -f ml/docker-compose.ml.yml logs ml-inference | grep -i error
-```
-
-## 🔄 개발 워크플로우
-
-### 코드 변경 시
-```bash
-# 백엔드 변경 후
-make restart-backend
-
-# 프론트엔드 변경 후
-make restart-frontend
-
-# ML 추론 서비스 변경 후
-make restart-ml
-
-# Nginx 설정 변경 후
-make nginx-reload
-```
-
-### 데이터베이스 마이그레이션
-```bash
-# 마이그레이션 실행
-make migrate
-```
-
-## 📝 추가 정보
-
-- **Docker Compose 버전**: 2.x 이상 필요
-- **최소 메모리**: 4GB 권장 (ML 서비스 포함 시 8GB 권장)
-- **디스크 공간**: 15GB 이상 권장 (ML 모델 캐시 포함)
-- **지원 OS**: Linux, macOS, Windows (Docker Desktop)
-- **네트워크**: 외부 네트워크 `uhok_net` 사용
-- **볼륨**: Redis 데이터, ML 모델 캐시 영속성 보장
-
-## 🔗 관련 문서
-
-- [Docker Compose 명령어 가이드](docker-compose-commands.md)
-- [Nginx 설정](public/nginx.conf)
-- [백엔드 서비스](../uhok-backend/README.md)
-- [프론트엔드 서비스](../uhok-frontend/README.md)
-- [ML 추론 서비스](../uhok-ml-inference/README.md)
