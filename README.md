@@ -1,7 +1,7 @@
 # UHOK 배포 환경 (Docker Compose)
 
 UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환경입니다. 
-백엔드, 프론트엔드, ML 추론 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
+백엔드, 프론트엔드, 임베딩 ML 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
 
 ## 📁 폴더 구조
 
@@ -10,7 +10,7 @@ uhok-deploy/
 ├── app/                            # 앱 서비스 (백엔드, 프론트엔드, Redis)
 │   ├── .env
 │   └── docker-compose.app.yml
-├── ml/                             # ML 추론 서비스
+├── ml/                             # 임베딩 ML 서비스
 │   └── docker-compose.ml.yml
 └── public/                         # 공개 서비스 (Nginx, 전체 통합)
 │   ├── .env
@@ -24,7 +24,7 @@ uhok-deploy/
 - `public/docker-compose.public.yml` - 웹 서비스 (Nginx, 프론트엔드)
 - `public/nginx.conf` - Nginx 리버스 프록시 설정
 - `app/docker-compose.app.yml` - 앱 서비스 (백엔드, Redis)
-- `ml/docker-compose.ml.yml` - ML 추론 서비스
+- `ml/docker-compose.ml.yml` - ML 서비스
 - `Makefile` - 자주 사용하는 Docker Compose 명령어 단축키
 - `docker-compose-commands.md` - Docker Compose 명령어 상세 가이드
 
@@ -62,7 +62,7 @@ uhok-deploy/
 - **redis** (redis:7-alpine) - 캐시 및 세션 저장소 (프로필: `with-redis`)
 
 ### ML 서비스 (ml/)
-- **ml-inference** (uhok-ml-inference:1.2.0) - Python ML 추론 서비스
+- **ml-inference** (uhok-ml-inference:1.2.0) - Python ML 서비스
 
 ## 🔧 빠른 시작
 
@@ -88,7 +88,7 @@ make up-ml       # ML 서비스 (ml-inference)
 # 백엔드만 실행 (Redis 포함)
 make up-backend
 
-# ML 추론 서비스만 실행
+# ML 서비스만 실행
 make up-ml
 
 # 프론트엔드만 실행
@@ -107,7 +107,7 @@ make up-nginx
 - **주문 관리**: 통합 주문 시스템, 결제 처리, 웹훅 방식 결제 확인
 - **레시피 추천**: 재료 기반 레시피 추천, 하이브리드 추천, 벡터 유사도 검색
 - **데이터베이스 연동**: MariaDB, PostgreSQL 지원
-- **ML 서비스 연동**: 별도 ML 추론 서비스와 통신
+- **ML 서비스 연동**: 별도 ML 서비스와 통신
 
 ### 프론트엔드 서비스 (uhok-frontend)
 - **반응형 웹 UI**: 모바일/데스크톱 지원
@@ -116,7 +116,7 @@ make up-nginx
 - **쇼핑 기능**: 홈쇼핑, 콕 상품 통합 쇼핑
 - **사용자 인터페이스**: 직관적인 사용자 경험
 
-### ML 추론 서비스 (uhok-ml-inference)
+### ML 서비스 (uhok-ml-inference)
 - **임베딩 생성**: SentenceTransformers 기반 레시피 임베딩
 - **모델**: paraphrase-multilingual-MiniLM-L12-v2
 - **성능 최적화**: CPU 전용, 컨테이너화된 배포
@@ -140,7 +140,7 @@ make up-nginx
 - **포트**: 8001 (외부 노출)
 - **헬스체크**: `/health`
 - **환경변수**: `../uhok-ml-inference/.env` 파일 사용
-- **역할**: 머신러닝 모델 추론 서비스
+- **역할**: 임베딩 모델 서비스
 - **이미지**: uhok-ml-inference:1.2.0
 - **볼륨**: `ml_cache` (모델 캐시)
 
