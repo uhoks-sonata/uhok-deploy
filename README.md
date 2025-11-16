@@ -11,6 +11,7 @@ uhok-deploy/
 │   ├── .env
 │   └── docker-compose.app.yml
 ├── ml/                             # 임베딩&벡터유사도계산 ML 서비스
+│   ├── .env
 │   └── docker-compose.ml.yml
 └── public/                         # 공개 서비스 (Nginx, 전체 통합)
 │   ├── .env
