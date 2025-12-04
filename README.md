@@ -1,7 +1,10 @@
 # UHOK 배포 환경 (Docker Compose)
 
-UHOK 프로젝트의 전체 스택을 Docker Compose로 관리하는 배포 환경입니다. 
+UHOK 프로젝트의 전체 스택을 **Docker Compose로 관리하는 배포 환경**입니다. 
+
 백엔드, 프론트엔드, 임베딩&벡터유사도계산 ML 서비스, Redis, Nginx를 포함한 마이크로서비스 아키텍처를 제공합니다.
+
+※ [uhok-data](https://github.com/uhoks-sonata/uhok-data.git)은 별도 실행이 필요합니다.
 
 ## 📁 폴더 구조
 
