@@ -19,8 +19,8 @@ services:
       # # 🔑 ML 통신 설정 (프라이빗 IP 권장)
       # - ML_BASE_URL=http://ml.internal:8001
       # - SERVICE_AUTH_TOKEN=${SERVICE_AUTH_TOKEN}
-    ports:
-      - "9000:9000"
+    # ports:
+    #   - "9000:9000"  # localhost:9000 직접 접근이 필요할 때만 사용
     expose:
       - "9000"
     healthcheck:

@@ -15,8 +15,8 @@ services:
     volumes:
       - ml_cache:/models/hf_cache   # 네임드 볼륨 -> 컨테이너 경로 매핑
       # - /data/models:/models:ro   # 모델 가중치는 이미지에 넣지 말고 볼륨/마운트 권장
-    ports:
-      - "8001:8001"   # localhost:8001로 접근 가능
+    # ports:
+    #   - "8001:8001"   # localhost:8001 직접 접근이 필요할 때만 사용
     expose:
       - "8001"   # 내부 통신도 유지
     healthcheck:
