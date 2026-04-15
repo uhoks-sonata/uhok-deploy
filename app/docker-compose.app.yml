@@ -4,7 +4,7 @@ services:
     build:
       context: ../../uhok-backend
       dockerfile: Dockerfile
-    image: uhok-backend:3.1.1
+    image: uhok-backend:3.2.0
     env_file:
       - .env
     # extra_hosts:
