@@ -34,7 +34,7 @@ uhok-deploy/
 
 ## 아키텍처
 
-![클라우드아키텍처](asserts\UhokCloundArchitecture_renew.drawio.png)
+![클라우드아키텍처](asserts/UhokCloundArchitecture_renew.drawio.png)
 
 
 ## 서비스 구성
