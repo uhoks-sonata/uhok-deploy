@@ -7,20 +7,19 @@ services:
     image: uhok-backend:3.2.1
     env_file:
       - .env
-    # extra_hosts:
-    #   # 🔒 ML EC2 프라이빗 IP를 내부 도메인으로 매핑
-    #   - "ml.internal:${ML_PRIVATE_IP}" # TODO: 프라이빗 IP 사용
-    #   - "host.docker.internal:host-gateway"
+    extra_hosts:
+      # 🔒 ML EC2 프라이빗 IP를 내부 도메인으로 매핑 (로컬: ML_PRIVATE_IP=host-gateway)
+      - "ml.internal:${ML_PRIVATE_IP:?app/.env에 ML_PRIVATE_IP 설정 필요}"
+      - "host.docker.internal:host-gateway"
     environment:
       - PYTHONPATH=/app
       - PYTHONUNBUFFERED=1
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      # # 🔑 ML 통신 설정 (프라이빗 IP 권장)
-      # - ML_BASE_URL=http://ml.internal:8001
-      # - SERVICE_AUTH_TOKEN=${SERVICE_AUTH_TOKEN}
-    # ports:
-    #   - "9000:9000"  # localhost:9000 직접 접근이 필요할 때만 사용
+      # 🔑 ML 통신 설정 (프라이빗 IP)
+      - ML_INFERENCE_URL=http://ml.internal:8001
+    ports:
+      - "9000:9000"  # public EC2의 nginx가 프라이빗 IP로 접근 (보안그룹으로 public EC2만 허용)
     expose:
       - "9000"
     healthcheck:
